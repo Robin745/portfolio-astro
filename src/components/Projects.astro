@@ -1,0 +1,368 @@
+---
+import Icon from './Icon.astro';
+import SectionHeading from './SectionHeading.astro';
+import { projects } from '@/data/site';
+
+// Layout rule: the featured project takes a full row, the rest pair up — and
+// when that would leave one card alone on the last row, the final three share
+// a row instead.
+const regularCount = projects.filter((project) => !project.featured).length;
+const thirdsFrom =
+  regularCount >= 3 && regularCount % 2 === 1 ? projects.length - 3 : Number.POSITIVE_INFINITY;
+
+const flowLabel = (project: (typeof projects)[number]) =>
+  `How it fits together: ${project.flow.map((tier) => tier.tech.join(' and ')).join(', then ')}`;
+---
+
+<section id="work" class="section container" aria-labelledby="work-title">
+  <SectionHeading
+    index="01"
+    label="Selected work"
+    title="Systems people depend on."
+    id="work-title"
+  >
+    Built with teams at my employers, for their clients. The source is private, but I’m happy to
+    walk through the architecture and my part in it.
+  </SectionHeading>
+
+  <ul class="projects" data-projects>
+    {projects.map((project, index) => (
+      <li
+        class:list={[
+          'project',
+          { featured: project.featured, third: !project.featured && index >= thirdsFrom },
+        ]}
+        data-reveal
+      >
+        <article data-spotlight>
+          <p class="meta mono muted">{project.org}</p>
+
+          <div class="body">
+            <h3>
+              {project.title}
+              <span class="kind">{project.kind}</span>
+            </h3>
+            <p class="summary muted">{project.summary}</p>
+
+            {project.story && (
+              <dl class="story">
+                {project.story.map((part) => (
+                  <div>
+                    <dt class="mono">{part.label}</dt>
+                    <dd>{part.text}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+
+            {project.highlights && (
+              <ul class="highlights" aria-label="Highlights">
+                {project.highlights.map((item) => (
+                  <li class="chip">{item}</li>
+                ))}
+              </ul>
+            )}
+
+            {(project.liveUrl || project.repoUrl) && (
+              <p class="links">
+                {project.liveUrl && (
+                  <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
+                    Live demo <Icon name="arrow-up-right" size={15} />
+                  </a>
+                )}
+                {project.repoUrl && (
+                  <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
+                    Source <Icon name="arrow-up-right" size={15} />
+                  </a>
+                )}
+              </p>
+            )}
+          </div>
+
+          {/* Featured: a tiered diagram, one box per technology. Others: one line. */}
+          {project.featured ? (
+            <ol class="diagram" aria-label={flowLabel(project)}>
+              {project.flow.map((tier) => (
+                <li class="tier">
+                  <span class="mono layer">{tier.layer}</span>
+                  <ul class="nodes">
+                    {tier.tech.map((tech) => (
+                      <li>{tech}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <ol class="flow" aria-label={flowLabel(project)}>
+              {project.flow.map((tier) => (
+                <li>{tier.tech.join(' · ')}</li>
+              ))}
+            </ol>
+          )}
+        </article>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  /* --- Grid --------------------------------------------------------------- */
+
+  .projects {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .project {
+    display: grid;
+    grid-column: span 3;
+  }
+
+  .project.third {
+    grid-column: span 2;
+  }
+
+  .featured {
+    grid-column: 1 / -1;
+  }
+
+  .project article {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: clamp(1.25rem, 2.5vw, 1.75rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    transition: border-color 0.25s var(--ease);
+  }
+
+  /* The cards aren't links, so hover only warms the border — no lift. */
+  .project article:hover {
+    border-color: color-mix(in oklab, var(--accent) 45%, var(--line-strong));
+  }
+
+  /* What the product is, as a quiet second line under its name. */
+  .kind {
+    display: block;
+    margin-block-start: 0.45rem;
+    color: var(--text-muted);
+    font-family: var(--font-sans-stack);
+    font-size: var(--step-0);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.4;
+  }
+
+  .body {
+    display: grid;
+    gap: 0.85rem;
+    flex: 1;
+    align-content: start;
+  }
+
+  h3 {
+    font-size: var(--step-2);
+  }
+
+  .summary {
+    max-width: 44rem;
+  }
+
+  .highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-block-start: 0.25rem;
+  }
+
+  .links {
+    display: flex;
+    gap: 1.25rem;
+    font-weight: 550;
+  }
+
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--accent);
+  }
+
+  /* --- Stack line (regular cards) ------------------------------------------
+     "Angular → Java → PostgreSQL": the whole pipeline as one line of text. */
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0;
+    padding-block-start: 1.1rem;
+    border-block-start: 1px dashed var(--line-strong);
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--1);
+    line-height: 1.5;
+  }
+
+  .flow li {
+    white-space: nowrap;
+  }
+
+  /* The arrow trails its item, so a wrapped line still starts flush left. */
+  .flow li:not(:last-child)::after {
+    content: '→' / '';
+    margin-inline: 0.6rem;
+    color: var(--accent);
+  }
+
+  /* --- Featured project --------------------------------------------------- */
+
+  .featured article {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    column-gap: clamp(1.5rem, 4vw, 3.5rem);
+    padding: clamp(1.5rem, 3.5vw, 2.5rem);
+    background:
+      radial-gradient(ellipse 70% 120% at 100% 0%, var(--accent-soft), transparent 70%),
+      var(--surface);
+  }
+
+  .featured .meta {
+    grid-column: 1 / -1;
+  }
+
+  .featured h3 {
+    font-size: var(--step-3);
+  }
+
+  .featured .summary {
+    font-size: var(--step-1);
+    line-height: 1.55;
+  }
+
+  /* Labelled paragraphs under the summary: "My part", "Outcome", … */
+  .story {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.25rem 2rem;
+    margin-block-start: 0.65rem;
+    padding-block-start: 1.25rem;
+    border-block-start: 1px dashed var(--line-strong);
+  }
+
+  .story dt {
+    margin-block-end: 0.35rem;
+    color: var(--accent);
+  }
+
+  .story dd {
+    max-width: 34rem;
+  }
+
+  /* --- Architecture diagram (featured card) --------------------------------
+     Tiers stack top to bottom; technologies in the same tier sit side by side. */
+
+  .diagram {
+    display: grid;
+    gap: 1.5rem;
+    align-content: center;
+  }
+
+  .tier {
+    position: relative;
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.8rem;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .layer {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+
+  .nodes {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .nodes li {
+    padding: 0.7rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-raised);
+    font-weight: 550;
+    line-height: 1.3;
+    text-align: center;
+    transition:
+      border-color 0.3s var(--ease),
+      background-color 0.3s var(--ease);
+  }
+
+  /* Connector between tiers: a short line ending in an arrowhead. */
+  .tier + .tier::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    width: 1px;
+    height: 1.5rem;
+    background: var(--line-strong);
+  }
+
+  .tier + .tier::after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    border: solid var(--accent);
+    border-width: 0 1.5px 1.5px 0;
+    translate: -50% 0;
+    rotate: 45deg;
+  }
+
+  /* On hover the tiers light up one after another, like a request flowing down. */
+  @media (hover: hover) {
+    article:hover .nodes li {
+      border-color: color-mix(in oklab, var(--accent) 55%, transparent);
+      background: color-mix(in oklab, var(--accent) 9%, var(--surface-raised));
+    }
+
+    article:hover .tier:nth-child(2) .nodes li {
+      transition-delay: 0.14s;
+    }
+
+    article:hover .tier:nth-child(3) .nodes li {
+      transition-delay: 0.28s;
+    }
+  }
+
+  @media (max-width: 64rem) {
+    .project.third {
+      grid-column: span 3;
+    }
+
+    .project.third:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 52rem) {
+    .project,
+    .project.third {
+      grid-column: 1 / -1;
+    }
+
+    .featured article {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 1.5rem;
+    }
+  }
+</style>

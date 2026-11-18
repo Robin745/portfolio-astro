@@ -1,0 +1,112 @@
+---
+import { Font } from 'astro:assets';
+import CommandPalette from '@/components/CommandPalette.astro';
+import Footer from '@/components/Footer.astro';
+import Header from '@/components/Header.astro';
+import { education, experience, profile, seo, skillGroups, socials } from '@/data/site';
+import themeInit from '@/scripts/theme-init.js?raw';
+import '@/styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Set on pages that should stay out of search results (e.g. 404). */
+  noindex?: boolean;
+}
+
+const { title = seo.title, description = seo.description, noindex = false } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/og.png', Astro.site);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: {
+    '@type': 'Person',
+    name: profile.name,
+    jobTitle: profile.role,
+    url: Astro.site?.href,
+    image: new URL('/apple-touch-icon.png', Astro.site).href,
+    email: `mailto:${profile.email}`,
+    address: { '@type': 'PostalAddress', addressLocality: 'Dhaka', addressCountry: 'BD' },
+    worksFor: { '@type': 'Organization', name: experience[0]?.company },
+    alumniOf: { '@type': 'CollegeOrUniversity', name: education[0]?.institution },
+    knowsAbout: skillGroups.flatMap((group) => group.skills.map((skill) => skill.name)),
+    knowsLanguage: ['bn', 'en'],
+    sameAs: socials.filter((s) => s.icon !== 'mail').map((s) => s.href),
+  },
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline set:html={themeInit} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={profile.name} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${profile.name} — ${profile.role}`} />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <Font cssVariable="--font-sans" preload />
+    <Font cssVariable="--font-mono" />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body id="top">
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <Header />
+    <div class="container print-only">
+      <p class="print-header">
+        <strong>{profile.name}</strong>
+        <span>
+          {profile.role} · {profile.location} · {profile.email}
+          {socials
+            .filter((s) => s.icon !== 'mail')
+            .map((s) => (
+              <> · {s.href.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '')}</>
+            ))}
+        </span>
+      </p>
+    </div>
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <CommandPalette />
+
+    <script>
+      import '@/scripts/main';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  main:focus {
+    outline: none;
+  }
+</style>

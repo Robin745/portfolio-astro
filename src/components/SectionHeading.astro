@@ -1,0 +1,58 @@
+---
+interface Props {
+  index: string;
+  label: string;
+  title: string;
+  id: string;
+}
+
+const { index, label, title, id } = Astro.props;
+---
+
+<header class="section-heading" data-reveal>
+  <p class="mono label">
+    <span class="index">{index}</span> {label}
+  </p>
+  <h2 id={id}>{title}</h2>
+  {Astro.slots.has('default') && (
+    <p class="intro muted">
+      <slot />
+    </p>
+  )}
+</header>
+
+<style>
+  .section-heading {
+    display: grid;
+    gap: 0.9rem;
+    max-width: 46rem;
+    margin-block-end: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .label::after {
+    content: '';
+    width: 3rem;
+    height: 1px;
+    background: var(--line-strong);
+  }
+
+  .index {
+    color: var(--accent);
+  }
+
+  h2 {
+    font-size: var(--step-3);
+  }
+
+  .intro {
+    font-size: var(--step-1);
+    line-height: 1.55;
+  }
+</style>

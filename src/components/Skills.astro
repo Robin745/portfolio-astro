@@ -1,0 +1,120 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import { skillGroups } from '@/data/site';
+
+// The legend only makes sense when at least one skill carries the dot.
+const hasCore = skillGroups.some((group) => group.skills.some((skill) => skill.core));
+---
+
+<section id="skills" class="section container" aria-labelledby="skills-title">
+  <SectionHeading index="03" label="Skills" title="The toolkit, by layer." id="skills-title">
+    {hasCore && (
+      <span class="legend">
+        <span class="core-dot" aria-hidden="true" /> marks what I use daily in my current role.
+      </span>
+    )}
+  </SectionHeading>
+
+  <ul class:list={['groups', { plain: !hasCore }]}>
+    {skillGroups.map((group) => (
+      <li class="group" data-reveal data-spotlight>
+        <h3 class="mono muted">{group.name}</h3>
+        <ul class="skills">
+          {group.skills.map((skill) => (
+            <li class:list={{ core: skill.core }}>
+              {skill.core && <span class="core-dot" aria-hidden="true" />}
+              {skill.name}
+              {skill.core && <span class="visually-hidden"> (used daily)</span>}
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .legend {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
+  .core-dot {
+    flex: none;
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Divider lines come from the 1px gap showing the container's background,
+     so they stay correct at any column count. */
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--line);
+    overflow: hidden;
+  }
+
+  .group {
+    padding: 1.5rem 1.25rem 1.75rem;
+    background: var(--surface);
+  }
+
+  h3 {
+    margin-block-end: 1.1rem;
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--1);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .skills {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .skills li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    padding-inline-start: 1.05rem;
+    font-size: var(--step-0);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--text-muted);
+  }
+
+  .skills li.core {
+    padding-inline-start: 0;
+    color: var(--text);
+  }
+
+  /* No skill carries the dot: no need for the dimming or the indent that
+     set the dotted ones apart. */
+  .plain .skills li {
+    padding-inline-start: 0;
+    color: var(--text);
+  }
+
+  @media (max-width: 60rem) {
+    .groups {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .group:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .groups {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,249 @@
+---
+import Icon, { type IconName } from './Icon.astro';
+import { nav, profile, socials } from '@/data/site';
+
+interface Command {
+  label: string;
+  group: 'Go to' | 'Action' | 'Link';
+  icon: IconName;
+  /** What the script should do: follow a hash, open a URL, or run a named action. */
+  kind: 'hash' | 'url' | 'action';
+  value: string;
+  keywords?: string;
+}
+
+const commands: Command[] = [
+  ...nav.map((item): Command => ({
+    label: item.label,
+    group: 'Go to',
+    icon: 'hash',
+    kind: 'hash',
+    value: item.href,
+  })),
+  { label: 'Back to top', group: 'Go to', icon: 'arrow-up', kind: 'hash', value: '#top' },
+  {
+    label: 'Copy email address',
+    group: 'Action',
+    icon: 'copy',
+    kind: 'action',
+    value: 'copy-email',
+    keywords: 'contact mail clipboard',
+  },
+  {
+    label: 'Switch colour theme',
+    group: 'Action',
+    icon: 'sun',
+    kind: 'action',
+    value: 'toggle-theme',
+    keywords: 'dark light mode appearance',
+  },
+  ...socials.map((social): Command => ({
+    label: social.icon === 'mail' ? 'Send an email' : `Open ${social.label}`,
+    group: 'Link',
+    icon: social.icon,
+    kind: 'url',
+    value: social.href,
+    keywords: social.handle,
+  })),
+  ...(profile.resumeUrl
+    ? [
+        {
+          label: 'Download CV',
+          group: 'Link',
+          icon: 'download',
+          kind: 'url',
+          value: profile.resumeUrl,
+          keywords: 'cv resume pdf',
+        } satisfies Command,
+      ]
+    : []),
+];
+---
+
+<dialog class="palette no-print" aria-label="Command menu" data-palette data-email={profile.email}>
+  <div class="search">
+    <Icon name="search" size={18} />
+    <input
+      type="text"
+      role="combobox"
+      aria-expanded="true"
+      aria-controls="palette-list"
+      aria-autocomplete="list"
+      aria-label="Search sections and actions"
+      placeholder="Jump to a section or run a command…"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      data-palette-input
+    />
+    <kbd>Esc</kbd>
+  </div>
+
+  <ul id="palette-list" class="list" role="listbox" aria-label="Commands" data-palette-list>
+    {commands.map((command, i) => (
+      <li
+        id={`palette-option-${i}`}
+        role="option"
+        aria-selected="false"
+        data-kind={command.kind}
+        data-value={command.value}
+        data-search={`${command.label} ${command.group} ${command.keywords ?? ''}`.toLowerCase()}
+      >
+        <Icon name={command.icon} size={16} />
+        <span class="label">{command.label}</span>
+        <span class="group mono">{command.group}</span>
+      </li>
+    ))}
+  </ul>
+  <p class="empty muted" data-palette-empty hidden>
+    Nothing matches that.
+  </p>
+
+  <footer class="help mono" aria-hidden="true">
+    <span>
+      <kbd>↑</kbd>
+      <kbd>↓</kbd> navigate
+    </span>
+    <span>
+      <kbd>Enter</kbd> select
+    </span>
+  </footer>
+</dialog>
+
+<style>
+  .palette {
+    width: min(36rem, calc(100vw - 2rem));
+    max-height: min(32rem, calc(100dvh - 6rem));
+    margin: 14vh auto auto;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: calc(var(--radius) * 1.15);
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow:
+      var(--shadow),
+      0 0 0 1px var(--line);
+    overflow: hidden;
+  }
+
+  .palette[open] {
+    display: flex;
+    flex-direction: column;
+    animation: palette-in 0.22s var(--ease);
+  }
+
+  .palette::backdrop {
+    background: rgb(0 0 0 / 0.45);
+    backdrop-filter: blur(4px);
+    animation: fade-in 0.2s var(--ease);
+  }
+
+  @keyframes palette-in {
+    from {
+      opacity: 0;
+      translate: 0 -10px;
+      scale: 0.98;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .search {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.1rem;
+    border-block-end: 1px solid var(--line);
+    color: var(--text-muted);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.25rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 1.0625rem;
+  }
+
+  input::placeholder {
+    color: var(--text-muted);
+  }
+
+  /* The dialog itself shows where focus is; the whole search row is the field. */
+  input:focus-visible {
+    outline: none;
+  }
+
+  .search:focus-within {
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+
+  .list {
+    flex: 1;
+    padding: 0.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.7rem 0.75rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  li[hidden] {
+    display: none;
+  }
+
+  li[aria-selected='true'] {
+    background: var(--accent-soft);
+    color: var(--text);
+  }
+
+  li[aria-selected='true'] :global(svg) {
+    color: var(--accent);
+  }
+
+  .label {
+    flex: 1;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .group {
+    font-size: 0.75rem;
+  }
+
+  .empty {
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+
+  .help {
+    display: flex;
+    gap: 1.25rem;
+    padding: 0.65rem 1.1rem;
+    border-block-start: 1px solid var(--line);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .help span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+</style>

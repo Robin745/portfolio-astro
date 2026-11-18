@@ -1,0 +1,30 @@
+---
+import Base from '@/layouts/Base.astro';
+---
+
+<Base title="Page not found — Moshiur Rahman" description="That page doesn’t exist." noindex>
+  <section class="container not-found">
+    <p class="mono muted">Error 404</p>
+    <h1>This route returned nothing.</h1>
+    <p class="muted">The page you’re looking for has moved or never existed.</p>
+    <a class="btn btn--primary" href="/">
+      Back to the homepage
+    </a>
+  </section>
+</Base>
+
+<style>
+  .not-found {
+    display: grid;
+    justify-items: start;
+    gap: 1.25rem;
+    padding-block: clamp(5rem, 16vw, 11rem);
+  }
+
+  h1 {
+    max-width: 14ch;
+    font-size: var(--step-4);
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+</style>

@@ -1,0 +1,47 @@
+---
+import { profile } from '@/data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container inner">
+    <p>
+      © {year} {profile.name}
+    </p>
+    <p class="muted">Built with Astro and TypeScript</p>
+    <a class="top no-print" href="#top">
+      Back to top
+    </a>
+  </div>
+</footer>
+
+<style>
+  /* The contact panel closes the page, so the footer sits closer to it than a
+     full section gap. */
+  .site-footer {
+    margin-block-start: calc(var(--section-gap) / 2);
+    border-block-start: 1px solid var(--line);
+    font-size: var(--step--1);
+  }
+
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 1.75rem;
+  }
+
+  .top {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--text-muted);
+  }
+
+  .top:hover {
+    color: var(--text);
+  }
+</style>

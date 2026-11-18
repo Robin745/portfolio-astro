@@ -1,0 +1,329 @@
+---
+import Icon from './Icon.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { nav, profile } from '@/data/site';
+---
+
+<header class="site-header no-print">
+  <div class="container bar">
+    <a class="brand" href="/">
+      <span class="monogram" aria-hidden="true">
+        MR
+      </span>
+      <span class="brand-name">{profile.name}</span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Primary">
+      <ul>
+        {nav.map((item) => (
+          <li>
+            <a href={item.href} data-nav-link>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <button type="button" class="palette-button" data-palette-open hidden>
+        <Icon name="search" size={18} />
+        <span>Search</span>
+      </button>
+      <ThemeToggle />
+      {profile.resumeUrl && (
+        <a class="btn btn--primary cv-button" href={profile.resumeUrl} download>
+          <Icon name="download" size={16} />
+          <span>
+            <span class="cv-verb">Download </span>CV
+          </span>
+        </a>
+      )}
+      <button
+        type="button"
+        class="menu-button"
+        popovertarget="mobile-nav"
+        aria-label="Open navigation menu"
+      >
+        <Icon name="menu" size={20} />
+      </button>
+    </div>
+  </div>
+
+  <span class="progress" aria-hidden="true"></span>
+
+  <div id="mobile-nav" class="mobile-nav" popover>
+    <nav aria-label="Mobile">
+      <ul>
+        {nav.map((item) => (
+          <li>
+            <a href={item.href} data-close-popover>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      {profile.resumeUrl && (
+        <a class="menu-cv" href={profile.resumeUrl} download data-close-popover>
+          <Icon name="download" size={18} />
+          Download CV
+        </a>
+      )}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: var(--header-h);
+    border-block-end: 1px solid var(--line);
+    background: color-mix(in oklab, var(--bg) 86%, transparent);
+    backdrop-filter: blur(16px) saturate(1.4);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    height: 100%;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 2.75rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .monogram {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9px;
+    background: var(--accent-solid);
+    color: var(--accent-contrast);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .desktop-nav ul {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .desktop-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.85rem;
+    border-radius: 999px;
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    text-decoration: none;
+    transition: color 0.2s var(--ease);
+  }
+
+  .desktop-nav a:hover,
+  .desktop-nav a[aria-current] {
+    color: var(--text);
+  }
+
+  .desktop-nav a[aria-current] {
+    background: var(--accent-soft);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Search is a round icon button; its label stays in the accessibility tree
+     as the button's name. */
+  .palette-button {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition:
+      border-color 0.2s var(--ease),
+      color 0.2s var(--ease);
+  }
+
+  .palette-button span,
+  .cv-verb {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* The one call to action that follows the visitor down the page. */
+  .cv-button {
+    min-height: 2.5rem;
+    margin-inline-start: 0.35rem;
+    padding: 0.4rem 0.95rem;
+    font-size: 0.9375rem;
+    box-shadow: none;
+    white-space: nowrap;
+  }
+
+  /* Wide screens have room for the full label. */
+  @media (min-width: 62.01rem) {
+    .cv-verb {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+    }
+  }
+
+  .palette-button[hidden] {
+    display: none;
+  }
+
+  .palette-button:hover {
+    border-color: var(--line-strong);
+    color: var(--text);
+  }
+
+  /* Reading progress: scroll-driven, so it costs no JavaScript. */
+  .progress {
+    position: absolute;
+    inset: auto 0 -1px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transform-origin: left;
+    scale: 0 1;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .progress {
+      animation: progress linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+
+  @keyframes progress {
+    to {
+      scale: 1 1;
+    }
+  }
+
+  .menu-button {
+    display: none;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .mobile-nav {
+    inset: calc(var(--header-h) + 0.5rem) var(--gutter) auto;
+    width: auto;
+    margin: 0;
+    padding: 0.5rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
+
+  .mobile-nav::backdrop {
+    background: rgb(0 0 0 / 0.35);
+  }
+
+  .mobile-nav a {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 1.0625rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .mobile-nav a:hover,
+  .mobile-nav a:focus-visible {
+    background: var(--accent-soft);
+  }
+
+  .mobile-nav .menu-cv {
+    align-items: center;
+    gap: 0.65rem;
+    margin-block-start: 0.5rem;
+    padding-block: 1rem;
+    border-block-start: 1px solid var(--line);
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Mid widths: keep the full nav by tightening the bar — the name gives way
+     to the monogram and the CV button drops its verb. */
+  @media (max-width: 62rem) {
+    .bar {
+      gap: 1rem;
+    }
+  }
+
+  @media (min-width: 47.51rem) and (max-width: 62rem) {
+    .brand-name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  /* Phones: the CV lives in the menu instead of the bar. */
+  @media (max-width: 47.5rem) {
+    .desktop-nav,
+    .palette-button,
+    .cv-button {
+      display: none;
+    }
+
+    .menu-button {
+      display: grid;
+    }
+  }
+
+  /* Very narrow screens: keep the name for assistive tech, hide it visually. */
+  @media (max-width: 24rem) {
+    .brand-name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+</style>

@@ -1,0 +1,217 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import { experience } from '@/data/site';
+---
+
+<section id="experience" class="section container" aria-labelledby="experience-title">
+  <SectionHeading
+    index="02"
+    label="Experience"
+    title="Where I’ve done the work."
+    id="experience-title"
+  />
+
+  <ol class="timeline">
+    {experience.map((role) => (
+      <li class:list={['role', { current: !role.end }]} data-reveal>
+        <p class="period mono muted">
+          <time datetime={role.start}>{role.period.split(' — ')[0]}</time>
+          {' — '}
+          {role.end ? (
+            <time datetime={role.end}>{role.period.split(' — ')[1]}</time>
+          ) : (
+            <span class="now">Present</span>
+          )}
+        </p>
+
+        <div class="detail">
+          <h3>
+            {role.title}
+            <span class="company">{role.company}</span>
+          </h3>
+          <ul class="points">
+            {role.points.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ul>
+          <ul class="stack" aria-label="Technologies">
+            {role.stack.map((tech) => (
+              <li class="chip">{tech}</li>
+            ))}
+          </ul>
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  /* A rail runs down the left edge; its accent fill grows as you scroll
+     through the section (scroll-driven, so no JavaScript involved). */
+  .timeline {
+    --rail-x: 5px;
+    position: relative;
+    padding-inline-start: clamp(1.75rem, 4vw, 2.75rem);
+  }
+
+  .timeline::before,
+  .timeline::after {
+    content: '';
+    position: absolute;
+    inset-block: 0.5rem 0;
+    left: var(--rail-x);
+    width: 1px;
+    background: var(--line-strong);
+  }
+
+  .timeline::after {
+    background: linear-gradient(var(--accent), var(--accent-2));
+    transform-origin: top;
+    scale: 1 0;
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .timeline::after {
+        animation: grow linear both;
+        animation-timeline: view();
+        animation-range: cover 22% cover 68%;
+      }
+    }
+  }
+
+  @keyframes grow {
+    to {
+      scale: 1 1;
+    }
+  }
+
+  .role {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3.2fr);
+    gap: clamp(1rem, 4vw, 3rem);
+    padding-block-end: clamp(2rem, 5vw, 3.25rem);
+  }
+
+  .role + .role {
+    padding-block-start: clamp(2rem, 5vw, 3.25rem);
+    border-block-start: 1px solid var(--line);
+  }
+
+  /* Marker on the rail. */
+  .role::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    left: calc((clamp(1.75rem, 4vw, 2.75rem) - var(--rail-x)) * -1);
+    width: 11px;
+    height: 11px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    background: var(--bg);
+    translate: -50% 0;
+    z-index: 1;
+  }
+
+  .role + .role::before {
+    top: calc(clamp(2rem, 5vw, 3.25rem) + 0.5rem);
+  }
+
+  .role.current::before {
+    background: var(--accent);
+    box-shadow: 0 0 0 5px var(--accent-soft);
+  }
+
+  .period {
+    padding-block-start: 0.35rem;
+  }
+
+  .now {
+    color: var(--accent);
+  }
+
+  h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.9rem;
+    font-size: var(--step-2);
+  }
+
+  .company {
+    color: var(--text-muted);
+    font-family: var(--font-sans-stack);
+    font-size: var(--step-1);
+    font-weight: 450;
+    letter-spacing: -0.01em;
+  }
+
+  .company::before {
+    content: '@ ';
+    color: var(--accent);
+  }
+
+  .points {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 46rem;
+    margin-block: 1.1rem 1.4rem;
+  }
+
+  .points li {
+    position: relative;
+    padding-inline-start: 1.4rem;
+    color: var(--text-muted);
+  }
+
+  .points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 0.6rem;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .stack .chip {
+    transition:
+      border-color 0.2s var(--ease),
+      color 0.2s var(--ease);
+  }
+
+  .stack .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  @media (max-width: 44rem) {
+    .role {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.6rem;
+    }
+
+    .period {
+      padding-block-start: 0;
+    }
+  }
+
+  @media print {
+    .timeline {
+      padding-inline-start: 0;
+    }
+
+    .timeline::before,
+    .timeline::after,
+    .role::before {
+      display: none;
+    }
+  }
+</style>

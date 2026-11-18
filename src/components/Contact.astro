@@ -1,0 +1,243 @@
+---
+import Icon from './Icon.astro';
+import { profile, socials } from '@/data/site';
+---
+
+<section id="contact" class="section container" aria-labelledby="contact-title">
+  <div class="panel" data-reveal data-spotlight>
+    <p class="mono label">
+      <span class="index">05</span> Contact
+    </p>
+    <h2 id="contact-title">Building something that has to work? Let’s talk.</h2>
+    <p class="intro">
+      I’m always glad to hear about interesting engineering problems, roles and collaborations.
+      Email is the fastest way to reach me.
+    </p>
+    <p class="where">
+      <Icon name="map-pin" size={16} />
+      Based in {profile.location} ({profile.timezone})
+    </p>
+
+    <div class="email">
+      <a class="address" href={`mailto:${profile.email}`}>
+        {profile.email}
+      </a>
+      <!-- The buttons keep a row of their own under the address at every width. -->
+      <div class="actions no-print">
+        <button type="button" class="btn copy" data-copy={profile.email}>
+          <Icon name="copy" size={16} />
+          <span data-copy-label>Copy</span>
+        </button>
+        <span class="visually-hidden" role="status" aria-live="polite" data-copy-status></span>
+        {profile.resumeUrl && (
+          <a class="btn copy" href={profile.resumeUrl} download>
+            <Icon name="download" size={16} />
+            Download CV
+          </a>
+        )}
+      </div>
+    </div>
+
+    <ul class="links">
+      {socials
+        .filter((s) => s.icon !== 'mail')
+        .map((link) => (
+          <li>
+            <a href={link.href} target="_blank" rel="noopener noreferrer">
+              <Icon name={link.icon} size={18} />
+              <span>
+                {link.label}
+                <span class="handle">{link.handle}</span>
+              </span>
+              <Icon name="arrow-up-right" size={16} class="out" />
+            </a>
+          </li>
+        ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* The closing panel gets a little more air than the sections above it. */
+  #contact {
+    padding-block-start: calc(var(--section-gap) * 1.25);
+  }
+
+  /* A dark call-to-action panel in both themes, lit by two accent glows. It
+     carries its own tokens because it does not follow the page theme. */
+  .panel {
+    --panel-bg: #0c0c11;
+    --panel-text: #fafafa;
+    --panel-muted: #a9a9b4;
+    --panel-line: rgb(255 255 255 / 0.13);
+    --panel-accent: #8fb4ff;
+    --spot: var(--panel-accent);
+    position: relative;
+    padding: clamp(2rem, 7vw, 5rem) clamp(1.5rem, 6vw, 4.5rem);
+    border: 1px solid var(--line-strong);
+    border-radius: calc(var(--radius) * 1.5);
+    background:
+      radial-gradient(ellipse 60% 85% at 100% 0%, rgb(59 110 245 / 0.34), transparent 65%),
+      radial-gradient(ellipse 50% 75% at 0% 100%, rgb(56 189 248 / 0.16), transparent 65%),
+      var(--panel-bg);
+    color: var(--panel-text);
+    overflow: hidden;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--panel-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--panel-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 60% 90% at 100% 0%, #000 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .panel > * {
+    position: relative;
+  }
+
+  .label {
+    display: flex;
+    gap: 0.75rem;
+    color: var(--panel-muted);
+  }
+
+  .index {
+    color: var(--panel-accent);
+  }
+
+  h2 {
+    max-width: 18ch;
+    margin-block: 1.25rem 1.25rem;
+    font-size: var(--step-4);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .intro {
+    max-width: 36rem;
+    color: var(--panel-muted);
+    font-size: var(--step-1);
+    line-height: 1.55;
+  }
+
+  .where {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block-start: 1rem;
+    color: var(--panel-muted);
+  }
+
+  .where :global(svg) {
+    flex: none;
+    color: var(--panel-accent);
+  }
+
+  .email {
+    display: grid;
+    justify-items: start;
+    gap: 1.25rem;
+    margin-block: clamp(2rem, 5vw, 3rem);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .address {
+    font-family: var(--font-display-stack);
+    font-size: clamp(1.375rem, 0.9rem + 2.4vw, 2.5rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    text-decoration-color: var(--panel-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.25em;
+  }
+
+  .address:hover {
+    color: var(--panel-accent);
+  }
+
+  .copy {
+    border-color: var(--panel-line);
+    color: var(--panel-text);
+  }
+
+  .copy:hover {
+    border-color: var(--panel-text);
+  }
+
+  :focus-visible {
+    outline-color: var(--panel-accent);
+  }
+
+  .links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    max-width: 40rem;
+  }
+
+  .links a {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--panel-line);
+    border-radius: var(--radius);
+    font-weight: 550;
+    line-height: 1.3;
+    text-decoration: none;
+    transition:
+      border-color 0.2s var(--ease),
+      background-color 0.2s var(--ease);
+  }
+
+  .links a:hover {
+    border-color: var(--panel-accent);
+    background: color-mix(in oklab, var(--panel-accent) 10%, transparent);
+  }
+
+  .links a > span {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .handle {
+    color: var(--panel-muted);
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--1);
+    font-weight: 400;
+    overflow-wrap: anywhere;
+  }
+
+  .links :global(.out) {
+    color: var(--panel-muted);
+  }
+
+  @media (max-width: 36rem) {
+    .links {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media print {
+    .panel {
+      padding: 0;
+      background: none;
+      color: #000;
+      --panel-muted: #333;
+      --panel-accent: #1d4ed8;
+    }
+  }
+</style>
